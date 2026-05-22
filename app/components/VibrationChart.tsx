@@ -128,8 +128,7 @@ export function VibrationChart({ data }: VibrationChartProps) {
                 value: `PICO MÁXIMO: ${peakValue} Hz`, 
                 fill: '#ef4444', 
                 fontSize: 10, 
-                fontWeight: '900',
-                backgroundColor: 'var(--background)'
+                fontWeight: '900'
               }} 
             />
           )}

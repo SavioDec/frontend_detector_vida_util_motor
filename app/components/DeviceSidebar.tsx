@@ -78,17 +78,7 @@ export function DeviceSidebar({ selectedDeviceId, onSelectDevice, deviceStatuses
       </nav>
 
       {/* Bottom Profile Area */}
-      <div className="p-4 border-t border-border mt-auto bg-background/50 transition-colors">
-        <div className="hidden md:flex items-center gap-3 p-2 rounded-xl bg-card border border-border shadow-sm">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-            <Zap className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-foreground">OPERADOR MASTER</span>
-            <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest leading-none">Sessão Ativa</span>
-          </div>
-        </div>
-      </div>
+      
     </aside>
   );
 }
