@@ -15,6 +15,37 @@ interface MonthlyAnalyticsProps {
   data: TelemetryData[];
 }
 
+/**
+ * Tenta converter qualquer formato de data para um objeto Date válido.
+ * Copiado da VibrationChart para consistência.
+ */
+function safeParseDate(dateStr: any): Date {
+  if (!dateStr) return new Date();
+  if (dateStr instanceof Date) return dateStr;
+  
+  let d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d;
+
+  // Tenta tratar formato brasileiro: "21/05/2026 21:00:00" -> "2026-05-21T21:00:00"
+  try {
+    const parts = String(dateStr).split(/[/\s:]/);
+    if (parts.length >= 3) {
+      // [DD, MM, YYYY, ...]
+      d = new Date(
+        Number(parts[2]), 
+        Number(parts[1]) - 1, 
+        Number(parts[0]), 
+        Number(parts[3] || 0), 
+        Number(parts[4] || 0), 
+        Number(parts[5] || 0)
+      );
+      if (!isNaN(d.getTime())) return d;
+    }
+  } catch (e) {}
+
+  return new Date();
+}
+
 export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
   const stats = useMemo(() => {
     if (data.length === 0) return null;
@@ -28,7 +59,7 @@ export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
     let motorOffCount = 0;
 
     data.forEach(item => {
-      const date = new Date(item.data_hora);
+      const date = safeParseDate(item.data_hora);
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const dayKey = `${day}/${month}`;
@@ -40,7 +71,6 @@ export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
       if (item.vibracao > maxVibration) maxVibration = item.vibracao;
       if (item.emergencia) emergencyCount++;
       
-      // Lógica Binária Industrial: Se vibra > 2Hz, motor está em carga (LIGADO)
       if (item.vibracao > 2 || item.status_motor === "LIGADO") {
         motorOnCount++;
       } else {
@@ -108,7 +138,7 @@ export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm transition-colors">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-emerald-500/10 rounded-lg"><Zap className="w-4 h-4 text-emerald-500" /></div>
             <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Utilização Real</h3>
@@ -126,7 +156,7 @@ export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm transition-colors">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-blue-500/10 rounded-lg"><BarChart3 className="w-4 h-4 text-blue-500" /></div>
             <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Amplitude de Vibração</h3>
@@ -156,7 +186,7 @@ export function MonthlyAnalytics({ data }: MonthlyAnalyticsProps) {
 
 function MetricCard({ title, value, subValue, icon: Icon, color, bg }: any) {
   return (
-    <div className="bg-card border border-border p-6 rounded-3xl shadow-sm transition-all">
+    <div className="bg-card border border-border p-6 rounded-3xl shadow-sm transition-all hover:border-zinc-400 dark:hover:border-zinc-600">
       <div className="flex items-start justify-between mb-4">
         <div className={`p-3 rounded-2xl ${bg} ${color}`}>
           <Icon className="w-5 h-5" />
@@ -165,7 +195,7 @@ function MetricCard({ title, value, subValue, icon: Icon, color, bg }: any) {
       </div>
       <div>
         <p className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground mb-1">{title}</p>
-        <p className={`text-2xl font-black ${color} dark:text-foreground tracking-tighter`}>{value}</p>
+        <p className={`text-2xl font-black text-foreground tracking-tighter`}>{value}</p>
       </div>
     </div>
   );
