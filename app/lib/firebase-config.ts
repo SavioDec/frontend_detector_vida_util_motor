@@ -14,37 +14,38 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 /**
- * Helper para obter o valor bruto da data para exibição.
- * Prioriza a string exata do banco.
+ * Helper para obter o valor da data para exibição sem nanosegundos.
+ * Mantém o horário bruto do banco.
  */
 function parseFirebaseDate(data: any): string {
   if (!data) return "";
   
-  // Se for uma string (caso o banco já salve formatado)
-  if (typeof data === 'string') return data;
+  let d: Date;
 
   // Se for um Timestamp do Firebase
   if (typeof data.toDate === 'function') {
-    const d = data.toDate();
-    // Retorna formato ISO local sem o Z (evita conversão indesejada no JS)
-    const offset = d.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(d.getTime() - offset)).toISOString().slice(0, -1);
-    return localISOTime.replace('T', ' ');
+    d = data.toDate();
+  } else if (data.seconds !== undefined) {
+    d = new Date(data.seconds * 1000);
+  } else {
+    d = new Date(data);
   }
 
-  // Se for objeto {seconds, nanoseconds}
-  if (data.seconds !== undefined) {
-    const d = new Date(data.seconds * 1000);
-    const offset = d.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(d.getTime() - offset)).toISOString().slice(0, -1);
-    return localISOTime.replace('T', ' ');
-  }
+  if (isNaN(d.getTime())) return String(data);
 
-  return String(data);
+  // Formata manualmente para remover nanosegundos e manter precisão de segundos
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
- * Busca histórico filtrado.
+ * Busca histórico filtrado com suporte a intervalo de datas e paginação.
  */
 export async function fetchFilteredHistory(
   machineId: string, 
@@ -83,7 +84,7 @@ export async function fetchFilteredHistory(
 }
 
 /**
- * Escuta em tempo real a telemetria do Firebase.
+ * Escuta em tempo real a telemetria do Firebase para uma máquina específica.
  */
 export function subscribeToTelemetry(machineId: string, callback: (data: TelemetryData[]) => void) {
   const q = query(
