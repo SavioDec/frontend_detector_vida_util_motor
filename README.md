@@ -1,6 +1,6 @@
-# Gateway I4.0 - Dashboard Industrial
+# D.I.V.I - Dashboard Industrial de vibracao de motores
 
-Este é o front-end do projeto **Gateway Industria 4.0**, um dashboard profissional desenvolvido em **Next.js** para monitoramento em tempo real, análise preditiva e controle operacional de ativos industriais (dispositivos ESP32).
+Este é o front-end do projeto **D.I.V.I**, um dashboard profissional desenvolvido em **Next.js** para monitoramento em tempo real, análise preditiva e controle operacional de ativos industriais (dispositivos ESP32).
 
 O sistema foi arquitetado com foco em **alta disponibilidade** e **otimização de custos em nuvem**, utilizando uma estratégia de sincronização de dados híbrida.
 
